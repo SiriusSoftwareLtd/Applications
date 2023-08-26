@@ -11,7 +11,7 @@ const oauthAPIBase = 'https://discord.com/api/oauth2/';
 const scope = encodeURIComponent('connections guilds.members.read identify');
 
 //TODO: Change this to production URL or make ternary
-const callBackURL = dev ? 'http://localhost:5173/login/callback' : 'https://apply.sirius.menu/login/callback';
+const callBackURL = 'https://apply.sirius.menu/login/callback';
 
 export const ExchangeAccessToken = async (code: string): Promise<DiscordAccessTokenResponse> => {
   const body = new URLSearchParams();
