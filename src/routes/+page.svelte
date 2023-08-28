@@ -1,8 +1,6 @@
 <script lang="ts">
-  // Imports
-  import { superForm } from 'sveltekit-superforms/client';
   // local imports
-  import type { PageData } from './$types';
+  import type { ActionData, PageData } from './$types';
   import FormQuestionContainer from '../components/FormComponents/FormQuestionContainer.svelte';
   import Input from '../components/FormComponents/Input.svelte';
   import TextArea from '../components/FormComponents/TextArea.svelte';
@@ -12,68 +10,16 @@
   import Checkbox from '../components/FormComponents/Checkbox.svelte';
   import SubmitButton from '../components/FormComponents/SubmitButton.svelte';
   import Navbar from '../components/Navbar.svelte';
-  import { page } from '$app/stores';
+  import { enhance } from '$app/forms';
 
   let submitButtonDisabled = false;
   let submitButtonText = 'Submit';
 
   // Exports
   export let data: PageData;
+  /** @type {import('./$types').ActionData} */
+  export let form: ActionData;
 
-  export const { form, enhance, constraints, errors } = superForm($page.form, {
-    taintedMessage: 'Are you sure you want to leave?',
-    multipleSubmits: 'prevent',
-    validators: {
-      name: (value) => (value.length >= 2 ? 'Name must be at least 2 characters long' : null),
-      siriusDiscovery: (value) => (value.length >= 1 ? 'Sirius Discovery must be at least 1 characters long' : null),
-      spareTime: (value) => (value.length >= 1 ? 'Spare time must be at least 1 characters long' : null),
-      question1: (value) => (value.length >= 1 ? 'Question 1 must be at least 1 characters long' : null),
-      question2: (value) => (value.length >= 1 ? 'Question 2 must be at least 1 characters long' : null),
-      question3: (value) => (value.length >= 1 ? 'Question 3 must be at least 1 characters long' : null),
-      question4: (value) => (value.length >= 1 ? 'Question 4 must be at least 1 characters long' : null),
-      question5: (value) => (value.length >= 1 ? 'Question 5 must be at least 1 characters long' : null),
-      question6: (value) => (value.length >= 1 ? 'Question 6 must be at least 1 characters long' : null),
-      question7: (value) => (value.length >= 1 ? 'Question 7 must be at least 1 characters long' : null),
-      question8: (value) => (value.length >= 1 ? 'Question 8 must be at least 1 characters long' : null),
-      question9: (value) => (value.length >= 1 ? 'Question 9 must be at least 1 characters long' : null),
-      contactStaff: (value) => (value.length >= 1 ? 'Contact Staff must be at least 1 characters long' : null),
-      contactInfo: (value) => (value.length >= 1 ? 'Contact Info must be at least 1 characters long' : null),
-      data: (value) => (value.length >= 1 ? 'Data must be at least 1 characters long' : null)
-    },
-    onSubmit: () => {
-      submitButtonDisabled = true;
-      submitButtonText = 'Submitting...';
-    },
-    onResult: ({ result, formEl, cancel }) => {
-      if (result.type === 'success') {
-        submitButtonText = 'Submitted!';
-        submitButtonDisabled = true;
-        setTimeout(() => {
-          submitButtonText = 'Submit';
-          submitButtonDisabled = false;
-        }, 2000);
-        formEl.reset();
-      } else {
-        // @ts-expect-error because it has weird params
-        submitButtonText = result.data.message;
-        submitButtonDisabled = true;
-        setTimeout(() => {
-          submitButtonText = 'Submit';
-          submitButtonDisabled = false;
-        }, 2000);
-        cancel();
-      }
-    },
-    onError: ({ result, message }) => {
-      console.log('onError', result, message);
-      submitButtonText = 'Error! Please try again.';
-      submitButtonDisabled = true;
-      setTimeout(() => {
-        submitButtonText = 'Submit';
-        submitButtonDisabled = false;
-      }, 2000);
-    }
-  });
 </script>
 
 <Navbar />
@@ -95,12 +41,38 @@
     </dl>
   </div>
 
-  <form method="post" id="form" use:enhance>
+  <form method="post" id="form" use:enhance={({}) => {
+    return async ({result}) => {
+     switch (result.status) {
+      case 200: {
+        submitButtonText = 'Submitted!';
+        submitButtonDisabled = true;
+        break;
+      }
+      case 400: {
+        submitButtonText = 'Application already submitted!';
+        submitButtonDisabled = true;
+        break;
+      }
+      case 500: {
+        submitButtonText = 'Server error! Please try again later.';
+        submitButtonDisabled = true;
+      }
+
+     } 
+     if(result.status !== 500) {
+        setTimeout(() => {
+          submitButtonText = 'Submit';
+          submitButtonDisabled = false;
+        }, 2000);
+      }
+    } 
+  }} on:submit={() => { submitButtonDisabled = true; submitButtonText = 'Submitting...';}}>
     <div id="#FormQuestions" class="flex flex-col flex-wrap space-y-6 px-4 py-8 sm:px-8 md:px-16 lg:px-32 xl:px-48 2xl:px-72">
       <FormQuestionContainer title="Introductory Questions" description="Before we begin, we'd like to get to know you, as a person, before getting to know about your skills and what you can bring to the team.">
-        <Input label="What should we call you?" placeholder="Craig" name="name" type="text" contraints={$constraints.name} />
-        <Input label="Where did you hear about Sirius?" placeholder="From a friend" name="siriusDiscovery" type="text" contraints={$constraints.siriusDiscovery} />
-        <Input label="What do you like to do, in your spare time?" placeholder="Help other people" name="spareTime" type="text" contraints={$constraints.spareTime} />
+        <Input label="What should we call you?" placeholder="Craig" name="name" type="text" />
+        <Input label="Where did you hear about Sirius?" placeholder="From a friend" name="siriusDiscovery" type="text"/>
+        <Input label="What do you like to do, in your spare time?" placeholder="Help other people" name="spareTime" type="text" />
       </FormQuestionContainer>
 
       <FormQuestionContainer title="Multiple-Choice Questions" description="For the following questions, choose the best, and most appropriate answer in your opinion so we can assess your knowledge of customer service">
@@ -126,12 +98,12 @@
         </RadioContainer>
       </FormQuestionContainer>
       <FormQuestionContainer title="Formal Questions" description="Now, we'd like to see how you'd fit into our team of support and staff, and if you're capable of keeping high standards while being friendly.">
-        <TextArea label="What inspired you to apply for the role of a support member, and what do you believe you can bring to the team?" name="question4" constraints={$constraints.question4} />
-        <TextArea label="What customer service experience do you have, and how do you handle difficult customers or situations?" name="question5" constraints={$constraints.question5} />
-        <TextArea label="Have you ever encountered a technical issue that you didn't know how to solve? If so, how did you go about finding a solution?" name="question6" constraints={$constraints.question6} />
-        <TextArea label="How would you handle a situation where a user is upset or frustrated about their experience with Sirius?" name="question7" constraints={$constraints.question7} />
-        <TextArea label="What do you believe is the most important quality for a support member to possess, and why?" name="question8" constraints={$constraints.question8} />
-        <TextArea label="How would you handle a situation where a user is making a fraudulent claim or attempting to mislead Sirius?" name="question9" constraints={$constraints.question9} />
+        <TextArea label="What inspired you to apply for the role of a support member, and what do you believe you can bring to the team?" name="question4"  />
+        <TextArea label="What customer service experience do you have, and how do you handle difficult customers or situations?" name="question5" />
+        <TextArea label="Have you ever encountered a technical issue that you didn't know how to solve? If so, how did you go about finding a solution?" name="question6" />
+        <TextArea label="How would you handle a situation where a user is upset or frustrated about their experience with Sirius?" name="question7"/>
+        <TextArea label="What do you believe is the most important quality for a support member to possess, and why?" name="question8" />
+        <TextArea label="How would you handle a situation where a user is making a fraudulent claim or attempting to mislead Sirius?" name="question9"/>
       </FormQuestionContainer>
 
       <div class="flex items-start justify-between">

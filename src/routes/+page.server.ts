@@ -1,7 +1,5 @@
 import type { Actions } from './$types';
 import { fail, redirect } from '@sveltejs/kit';
-import * as z from 'zod';
-import { superValidate } from 'sveltekit-superforms/server';
 import Applications from '$lib/server/database/models/application';
 import { ApplicationStatus, type FormResponses, type FormAgreements } from '$lib/types/application';
 import { v4 } from 'uuid';
@@ -28,12 +26,9 @@ export const actions: Actions = {
   default: async (event) => {
     const session = await validateSession(event.cookies);
 
+    const data = await event.request.clone().formData();
+
     if (!session) throw redirect(302, '/');
-    // Validate the form itself
-    const form = await superValidate(await event.request.clone().formData(), z.object({ name: z.string().min(1), siriusDiscovery: z.string().min(1), spareTime: z.string().min(1), question1: z.string().min(1), question2: z.string().min(1), question3: z.string().min(1), question4: z.string().min(1), question5: z.string().min(1), question6: z.string().min(1), question7: z.string().min(1), question8: z.string().min(1), question9: z.string().min(1), contactStaff: z.string().min(2), contactInfo: z.string().min(2), data: z.string().min(2) }));
-
-    if (!form.valid) return fail(400, { form });
-
     try {
       if (connectionStatus.status != mongoose.ConnectionStates.connected) {
         await connectToDB();
@@ -49,31 +44,28 @@ export const actions: Actions = {
       });
     }
 
-    const data = form.data;
-
     const questions: string[] = [];
-    for (const key in data) {
+    data.forEach((value, key) => {
       if (key.startsWith('question')) {
-        // hack to make ts' compiler approve of it
-        questions.push(data[key as keyof typeof data]);
+        questions.push(value as string);
       }
-    }
+    });
 
     const responses: FormResponses = {
-      Discovery: form.data.siriusDiscovery,
-      SpareTime: form.data.spareTime,
+      Discovery: data.get('siriusDiscovery') as string,
+      SpareTime: data.get('spareTime') as string,
       Questions: questions
     };
 
     const agreements: FormAgreements = {
-      Staff: form.data.contactStaff == 'on',
-      Info: form.data.contactInfo == 'on'
+      Staff: data.contactStaff == 'on',
+      Info: data.contactInfo == 'on'
     };
 
     // create and save new app
     const app: Application = {
       _id: v4(),
-      name: form.data.name,
+      name: data.get('name') as string,
       responses,
       agreements,
       createdAt: new Date(),
@@ -145,7 +137,7 @@ export const actions: Actions = {
       }
     }
     return {
-      props: form
+      props: {}
     };
   }
 };

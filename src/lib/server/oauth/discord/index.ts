@@ -54,10 +54,6 @@ export const GenerateUserFromAccessToken = async (resp: DiscordAccessTokenRespon
     reviewer: false
   };
 
-  console.log(gm.roles);
-  console.log('Is reviewer: ' + gm.roles.includes(PUBLIC_SIRIUS_REVIEWER_ID));
-  console.log('Is support: ' + gm.roles.includes(PUBLIC_SIRIUS_SUPPORT_ID));
-
   if (gm.roles.includes(PUBLIC_SIRIUS_SUPPORT_ID)) {
     user.support = true;
   }

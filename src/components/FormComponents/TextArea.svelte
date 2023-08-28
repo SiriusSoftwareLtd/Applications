@@ -13,7 +13,7 @@
         minlength: number;
         maxlength: number;
       }>
-    | undefined;
+    | undefined = {required: true, minlength: 10};
 
   switch (size) {
     case 'short':
