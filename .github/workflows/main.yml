@@ -11,17 +11,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@main
+     - uses: pnpm/action-setup@v2
+       with:
+         version: 8
 
       # Restart the server
-      - name: Restart server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.REMOTE_PORT }}
-          script: |
-            cd ${{ vars.REMOTE_PATH}}
-            ./restart.sh
+     - name: Restart server
+       uses: appleboy/ssh-action@master
+       with:
+        host: ${{ secrets.REMOTE_HOST }}
+        username: ${{ secrets.REMOTE_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: ${{ secrets.REMOTE_PORT }}
+        script: |
+          cd ${{ vars.REMOTE_PATH}}
+          ./restart.sh
