@@ -23,5 +23,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.REMOTE_PORT }}
           script: |
-            cd ${{ secrets.REMOTE_PATH }}
+            cd ${{ vars.REMOTE_PATH}}
             ./restart.sh
