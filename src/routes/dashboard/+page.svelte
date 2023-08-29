@@ -67,7 +67,7 @@
                           {application.discord.User.id}
                         </p>
                         <p class="mt-2 flex items-center text-sm text-neutral-400 sm:ml-4 sm:mt-0">
-                          {application.discord.User.username}#{application.discord.User.discriminator}
+                          {application.discord.User.username}{application.discord.User.discriminator == "0" ? "" : "#"+application.discord.User.discriminator}
                         </p>
                       </div>
                       <div class="mt-2 flex items-center text-sm text-neutral-400 sm:mt-0">
