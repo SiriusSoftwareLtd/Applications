@@ -33,7 +33,7 @@
         <dd class="mt-1 text-3xl font-semibold tracking-tight text-neutral-300">
           <img src="{data.user?.discord.User.avatar}?size=1024" class="inline-block h-10 w-10 rounded-full" alt="User Avatar" />
           <br />
-          {data.user?.discord.User.username + '#' + data.user?.discord.User.discriminator}
+          {`${data.user?.discord.User.username}${data.user?.discord.User.discriminator == "0" ? "" : `#${data.user?.discord.User.discriminator}`}`}
           <br />
           <span class="text-sm font-normal text-neutral-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100">Not you? <a href="/logout" class="underline">Logout</a></span>
         </dd>

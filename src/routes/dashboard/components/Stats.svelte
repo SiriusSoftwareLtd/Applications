@@ -11,7 +11,7 @@
         <div class="mx-4 my-2">
           <img src="{$page.data.application.discord.User.avatar}?size=1024" class="inline-block h-10 w-10 rounded-full" alt="User Avatar" />
           <br />
-          {$page.data.application.discord.User.username + '#' + $page.data.application.discord.User.discriminator}
+          {`${$page.data.user?.discord.User.username}${$page.data.user?.discord.User.discriminator == "0" ? "" : `#${$page.data.user?.discord.User.discriminator}`}`}
           <br />
           <p class="text-sm text-neutral-400">
             <span>Discord ID: {$page.data.application.discord.User.id}</span>
