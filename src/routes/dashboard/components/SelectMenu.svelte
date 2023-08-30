@@ -17,7 +17,7 @@
           {:else if $page.data.application.status === 2}
             <span class="inline-block h-2 w-2 flex-shrink-0 rounded-full bg-green-500" aria-hidden="true" />
           {/if}
-          <span class="ml-3 block truncate">{$page.data.application.discord.User.username}#{$page.data.application.discord.User.discriminator}</span>
+          <span class="ml-3 block truncate">{$page.data.application.discord.User.username}{$page.data.application.discord.User.discriminator == "0" ? "" : "#"+$page.data.application.discord.User.discriminator}</span>
         {:else}
           <span class="inline-block h-2 w-2 flex-shrink-0 rounded-full bg-transparent" />
           <span class="ml-3 block truncate">Select Application</span>
@@ -56,7 +56,7 @@
                       <span class="inline-block h-2 w-2 flex-shrink-0 rounded-full bg-green-500" aria-hidden="true" />
                     {/if}
                     <span class="ml-3 block truncate font-normal">
-                      {application.discord.User.username}#{application.discord.User.discriminator}
+                      {`${application.discord.User.username}${application.discord.User.discriminator == "0" ? "" : `#${application.discord.User.discriminator}`}`}
                     </span>
                   </div>
 
