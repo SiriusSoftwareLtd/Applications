@@ -5,4 +5,4 @@ pnpm install --frozen-lockfile
 # build App
 npm run build
 # restart the service in pm2 so updates
-pm2 restart "Jobs"
+pm2 restart "Applications"
