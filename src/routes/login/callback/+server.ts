@@ -1,5 +1,5 @@
 import { hash } from '$lib/server/hash';
-import { redirect, text } from '@sveltejs/kit';
+import { error, redirect, text } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { OAuthResponse } from '$lib/types/discord';
 import { ExchangeAccessToken } from '$lib/server/oauth';
@@ -29,6 +29,8 @@ export const GET = (async ({ url, getClientAddress, cookies }) => {
     }
     // eslint-disable-next-line no-empty
   } catch (_) {}
+
+  if(us.banned) {throw redirect(301, "/banned");}
 
   const existing = await Users.findOne({ 'discord.User.id': us.discord.User.id });
   if (!existing) {

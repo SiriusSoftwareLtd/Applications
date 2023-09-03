@@ -1,6 +1,6 @@
 import type { DiscordAccessTokenResponse, DiscordConnection } from '$lib/types/discord';
 import type { APIUser, APIGuildMember } from 'discord-api-types/v10';
-import { PUBLIC_SIRIUS_GUILD_ID, PUBLIC_SIRIUS_REVIEWER_ID, PUBLIC_SIRIUS_SUPPORT_ID } from '$env/static/public';
+import { PUBLIC_SIRIUS_GUILD_ID, PUBLIC_SIRIUS_REVIEWER_ID, PUBLIC_SIRIUS_SUPPORT_ID, PUBLIC_SIRIUS_BAN_ROLE } from '$env/static/public';
 import type { Connection, User } from '$lib/server/types/database';
 
 export const DiscordAPIBase = 'https://discord.com/api/';
@@ -51,8 +51,13 @@ export const GenerateUserFromAccessToken = async (resp: DiscordAccessTokenRespon
         connections
       }
     },
-    reviewer: false
+    reviewer: false,
+    banned: false
   };
+
+  if(gm.roles.includes(PUBLIC_SIRIUS_BAN_ROLE)) {
+   user.banned = true;
+  }
 
   if (gm.roles.includes(PUBLIC_SIRIUS_SUPPORT_ID)) {
     user.support = true;

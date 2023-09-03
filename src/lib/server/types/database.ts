@@ -27,6 +27,7 @@ export interface User {
   discord: DiscordUser;
   reviewer: boolean;
   support: boolean;
+  banned: boolean;
 }
 
 export interface Session {
