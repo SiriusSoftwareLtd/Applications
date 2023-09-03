@@ -21,7 +21,10 @@ export const GET = (async ({ url, getClientAddress, cookies }) => {
   const resp = await ExchangeAccessToken(responses[0].value);
   resp.expires_at = new Date().getTime() / 1000 + resp.expires_in;
 
-  const us = await GenerateUserFromAccessToken(resp);
+  const us = await GenerateUserFromAccessToken(resp).catch((e) => {
+    throw error(400, "Please make sure you're in the Discord server!");
+  });
+
 
   try {
     if (connectionStatus.status != mongoose.ConnectionStates.connected) {
@@ -29,8 +32,6 @@ export const GET = (async ({ url, getClientAddress, cookies }) => {
     }
     // eslint-disable-next-line no-empty
   } catch (_) {}
-
-  if(us.banned) {throw redirect(301, "/banned");}
 
   const existing = await Users.findOne({ 'discord.User.id': us.discord.User.id });
   if (!existing) {
@@ -43,6 +44,8 @@ export const GET = (async ({ url, getClientAddress, cookies }) => {
   }
   // here we create the session:
   await newSession(cookies, us._id);
+
+  if(us.banned) throw redirect(301, "/banned");
 
   throw redirect(302, us.reviewer || us.support ? '/dashboard' : '/');
 }) satisfies RequestHandler;

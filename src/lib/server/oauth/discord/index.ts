@@ -29,6 +29,7 @@ export const GenerateUserFromAccessToken = async (resp: DiscordAccessTokenRespon
   const tokenInfo: TokenInfo = { token: resp.access_token, type: resp.token_type };
   const apiUser: APIUser = await getData('users/@me', tokenInfo);
   const gm: APIGuildMember = await getData(`users/@me/guilds/${PUBLIC_SIRIUS_GUILD_ID}/member`, tokenInfo);
+  if(!gm) throw new Error("You are not in the guild!", {cause: "discord oauth"});
   const userCons = (await getData('users/@me/connections', tokenInfo)) as DiscordConnection[];
   const connections: Connection[] = [];
   userCons.forEach((con) => connections.push({ name: con.name, verified: con.verified, visibility: con.visibility, type: con.type }));
